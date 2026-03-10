@@ -419,6 +419,28 @@ function normalize(text) {
 	return text.toLowerCase().trim().replace(/\s+/g, " ");
 }
 
+// Levenshtein distance untuk toleransi typo
+function levenshtein(a, b) {
+	const m = a.length, n = b.length;
+	const dp = Array.from({ length: m + 1 }, (_, i) =>
+		Array.from({ length: n + 1 }, (_, j) => i === 0 ? j : j === 0 ? i : 0)
+	);
+	for (let i = 1; i <= m; i++) {
+		for (let j = 1; j <= n; j++) {
+			if (a[i-1] === b[j-1]) dp[i][j] = dp[i-1][j-1];
+			else dp[i][j] = 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+		}
+	}
+	return dp[m][n];
+}
+
+// Toleransi typo berdasarkan panjang kata
+function maxTypo(len) {
+	if (len <= 4) return 0; // kata pendek: harus tepat
+	if (len <= 7) return 1; // kata sedang: 1 typo ok
+	return 2;               // kata panjang: 2 typo ok
+}
+
 function isValidHewan(letter, answer) {
 	const key = letter.toUpperCase();
 	const list = hewanDatabase[key];
@@ -428,7 +450,12 @@ function isValidHewan(letter, answer) {
 	if (answerNorm[0] !== letter.toLowerCase()) return false;
 
 	for (const hewan of list) {
-		if (normalize(hewan) === answerNorm) return true;
+		const hewanNorm = normalize(hewan);
+		// Cocok persis
+		if (hewanNorm === answerNorm) return true;
+		// Fuzzy matching: toleransi typo
+		const allowed = maxTypo(hewanNorm.length);
+		if (allowed > 0 && levenshtein(hewanNorm, answerNorm) <= allowed) return true;
 	}
 	return false;
 }
