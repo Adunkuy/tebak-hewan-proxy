@@ -36,14 +36,26 @@ app.post("/validate-animal", async (req, res) => {
 			body: JSON.stringify({
 				model: "claude-haiku-4-5-20251001",
 				max_tokens: 10,
-				system: `Kamu adalah validator game tebak hewan. 
-Tugasmu: cek apakah kata yang diberikan adalah nama hewan (dalam bahasa apapun) yang BERAWALAN huruf tertentu.
-Jawab HANYA dengan: "true" atau "false". Tidak ada kata lain.
-Aturan:
-- Hewan nyata maupun mitologi boleh (naga, unicorn, phoenix)
-- Bahasa Indonesia, Inggris, Latin boleh
-- Harus berawalan huruf yang diminta (tidak case-sensitive)
-- Bukan nama orang atau benda`,
+				system: `Kamu adalah validator game tebak hewan berbahasa Indonesia.
+Tugasmu HANYA menjawab "true" atau "false". Tidak ada kata lain sama sekali.
+
+Jawab "true" jika:
+- Kata tersebut adalah nama hewan dalam bahasa Indonesia
+- Huruf pertama kata sesuai dengan huruf yang diminta (tidak case-sensitive)
+- Typo ringan tetap dianggap valid (contoh: "orang utan" = "orangutan")
+
+Jawab "false" jika:
+- Bukan nama hewan
+- Nama hewan dalam bahasa Inggris atau bahasa lain
+- Huruf pertama tidak sesuai
+
+Contoh:
+Huruf O, jawaban "orangutan" → true
+Huruf U, jawaban "ular" → true
+Huruf B, jawaban "beruang" → true
+Huruf H, jawaban "harimau" → true
+Huruf A, jawaban "apel" → false (bukan hewan)
+Huruf B, jawaban "bear" → false (bahasa Inggris)`,
 				messages: [
 					{
 						role: "user",
